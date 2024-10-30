@@ -1,33 +1,67 @@
 package com.aluracursos.screenmatch.controller;
 
 
+import com.aluracursos.screenmatch.dto.EpisodioDTO;
 import com.aluracursos.screenmatch.dto.SerieDTO;
-import com.aluracursos.screenmatch.model.Serie;
-import com.aluracursos.screenmatch.repository.SerieRepository;
+import com.aluracursos.screenmatch.service.SerieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+//Esta anotacion convierte la clase en un controlador rest por lo ue va a poder recibir solicitudes
+// HTTP en formato json(u otro formato si se especifica)
 @RestController
+@RequestMapping("/series")
 public class SerieController {
 
     @Autowired
-    private SerieRepository repository;
+    //Se inyecta una instancia de SerieService para usar sus metodos
+    private SerieService servicio;
 
-
-    @GetMapping("/series")
+    //Define un endpoint get en /series para que cuando se haga una solicitus get a esta ruta ejecute
+    //el metodo obtenertodaslaseries
+    @GetMapping()
     public List<SerieDTO> obtenerTodasLasSeries(){
-        return repository.findAll().stream()
-                . map(s -> new SerieDTO(s.getTitulo(), s.getTotalDeTemporadas(), s.getEvaluacion(), s.getPoster(), s.getGenero(),
-                        s.getActores(), s.getSinopsis())).collect(Collectors.toList());
+        //Devuelve una lista de serieDTO y la convierte automaticamente en json por la anotacion rest
+        return servicio.obtenerTodasLasSeries();
     }
 
-    @GetMapping("/inicio")
-    public String msj(){
-        return "mensaje pruebasassa";
+    @GetMapping("/top5")
+    public List<SerieDTO> obtenerTop5(){
+        return servicio.obtenerTop5();
     }
+
+    @GetMapping("/lanzamientos")
+    public List<SerieDTO> obtenerLanzamientosMasRecientes(){
+        return servicio.obtenerLanzamientosMasRecientes();
+    }
+
+    @GetMapping("/{id}")
+    public SerieDTO obtenerPorId(@PathVariable Long id){
+        return servicio.obtenerPorId(id);
+    }
+
+    @GetMapping("/{id}/temporadas/todas")
+    public List<EpisodioDTO> obtenerTodosLosCapitulos(@PathVariable Long id){
+        return servicio.obtenerTodasLasTemporadas(id);
+    }
+
+        @GetMapping("/{id}/temporadas/{numeroTemporada}")
+        public List<EpisodioDTO> obtenerTemporadasPorNumero(@PathVariable Long id,
+                                                            @PathVariable Long numeroTemporada){
+            return servicio.obtenerTemporadasPorNumero(id, numeroTemporada);
+        }
+
+    @GetMapping("/categoria/{nombreGenero}")
+    public List<SerieDTO> obtenerSeriePorCategoria(@PathVariable String nombreGenero){
+        return servicio.obtenerSeriePorCategoria(nombreGenero);
+    }
+
+
 
 }
